@@ -225,6 +225,27 @@ export const sendResetOtp = async (req, res) => {
     }
 }
 
+// export const verifyResetOtp = async (req, res) => {
+//     const { email, otp } = req.body;
+//     if (!email || !otp) {
+//         return res.json({ success: false, message: 'Please provide all required fields' });
+//     }
+//     try {
+//         const user = await userModel.findOne({ email });
+//         if (!user) {
+//             return res.json({ success: false, message: 'User not found' });
+//         }
+//         if (user.resetOtp === '' || user.resetOtp !== otp) {
+//             return res.json({ success: false, message: 'Invalid OTP' });
+//         }
+//         if (user.resetOtpExpires < Date.now()) {
+//             return res.json({ success: false, message: 'OTP Expired' });
+//         }   
+//     } catch (error) {
+//         return res.json({ success: false, message: error.message });
+//     }
+// }   
+
 // Reset Password Function
 export const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
