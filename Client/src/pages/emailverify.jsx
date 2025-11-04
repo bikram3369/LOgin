@@ -2,14 +2,16 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import axios from 'axios'
-import { use } from 'react'
 import { useEffect } from 'react'
+import { useContext } from 'react'
+import { AppContext } from '../context/AppContext'
 
 
 const emailverify = () => {
 
   const navigate = useNavigate();
   const inputRefs = React.useRef([]);
+  const { isLoggedin , userData } = useContext(AppContext);
 
   const handleInput = (e, index) => {
     const value = e.target.value;

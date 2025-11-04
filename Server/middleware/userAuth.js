@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 
 const userAuth = async (req, res, next) => {
   const { token } = req.cookies;
+
   if (!token) {
     return res.json({ success: false, message: "Not Authorized, Login again" });
   }
@@ -9,17 +10,19 @@ const userAuth = async (req, res, next) => {
   try {
     const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (tokenDecode.id) {
-      req.body = req.body || {}; // ✅ ensure body exists
-      req.body.userId = tokenDecode.id;
+    // ✅ Support both normal and Google login
+    if (tokenDecode.id || tokenDecode.email) {
+      req.body = req.body || {};
+      req.body.userId = tokenDecode.id || null;
+      req.body.userEmail = tokenDecode.email || null;
+      console.log("✅ User Authenticated:", tokenDecode);
+      next();
     } else {
       return res.json({
         success: false,
-        message: "not Authorized. Login Again",
+        message: "Invalid token payload, please login again.",
       });
     }
-
-    next();
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }

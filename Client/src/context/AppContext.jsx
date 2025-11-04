@@ -12,27 +12,25 @@ export const AppContextProvider = ({ children }) => {
 
   const getAuthState = async () => {
     try {
-      const { data } = await axios.post(
-        `${backendUrl}/api/auth/is-auth`,
-        {},
-        { withCredentials: true }
-      );
+      const { data } = await axios.post(`${backendUrl}/api/auth/is-auth`, {});
       if (data.success) {
         setIsLoggedin(true);
+        console.log("User is authenticated", data);
         getUserData();
+      } else {
+        setIsLoggedin(false);
       }
     } catch (error) {
       console.error("Error fetching auth state:", error);
+      setIsLoggedin(false);
     }
   };
 
   const getUserData = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/user/data`, {
-        withCredentials: true,
-      });
+      const { data } = await axios.get(`${backendUrl}/api/user/data`);
       if (data.success) {
-        setUserData(data.userData); // ✅ Only store the actual user object
+        setUserData(data.userData);
         console.log("User Data fetched:", data.userData);
       }
     } catch (error) {
@@ -42,6 +40,10 @@ export const AppContextProvider = ({ children }) => {
 
   useEffect(() => {
     getAuthState();
+
+    // 👇 Recheck after redirect (helps with Google login)
+    window.addEventListener("focus", getAuthState);
+    return () => window.removeEventListener("focus", getAuthState);
   }, []);
 
   useEffect(() => {

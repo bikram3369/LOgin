@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
 import transporter from '../config/nodemailer.js';
+import e from 'express';
 
 
 // user registration function
@@ -134,12 +135,12 @@ export const sendVerifyOtp = async (req, res) =>{
       
       await user.save();
 
-      const mailOption = {
+      const mailOption =  {
         from: process.env.SENDER_EMAIL,
         to: user.email,
         subject: 'Account Verification OTP',
         text: `Hello ${user.name},\n\nYour OTP for account verification is ${otp}. It is valid for 24 hours`
-      }
+      };
 
       await transporter.sendMail(mailOption);
 
@@ -186,13 +187,39 @@ export const verifyEmail = async (req, res) =>{
 }
 
 // Check if user is authenticated
+// export const isAuthenticated = async (req, res) => {
+//     try {
+//         return res.json({ success: true });
+//     } catch (error) {
+//         res.json({ success: false, message: error.message });
+//     }
+// }
+
 export const isAuthenticated = async (req, res) => {
-    try {
-        return res.json({ success: true });
-    } catch (error) {
-        res.json({ success: false, message: error.message });
+  try {
+    const { userId, userEmail } = req.body;
+
+    if (!userId && !userEmail) {
+      return res.json({ success: false, message: "No user ID or email found" });
     }
-}
+
+    // Find user either by ID (normal login) or email (Google login)
+    const user =
+      (userId && await userModel.findById(userId)) ||
+      (userEmail && await userModel.findOne({ email: userEmail }));
+
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
+    console.log("✅ User is authenticated:", user);
+    return res.json({ success: true, user });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+
 
 //send reset password otp
 export const sendResetOtp = async (req, res) => {
